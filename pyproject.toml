@@ -3,6 +3,10 @@ name = "vi-chess"
 version = "0.1.0"
 description = "Multi-universe chess engine prototype. Tests whether ensemble diversity beats single-eval at equal compute."
 readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Vanshdeep Singh Kohli", email = "vanshdeep08kohli@gmail.com"},
+]
 requires-python = ">=3.12"
 dependencies = [
     "python-chess>=1.999",
