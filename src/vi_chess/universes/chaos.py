@@ -24,21 +24,38 @@ IMBALANCE_CAP = 1000  # don't let huge material gaps dominate the chaos term
 
 @register("chaos")
 class ChaosUniverse(Universe):
+    """Chaos prefers complex positions — for *itself*, not for whoever is on move.
+
+    Earlier iterations tied the chaos_bonus to side-to-move. That looks right at
+    a leaf but breaks under negamax: the bonus is added at chaos's turns and
+    subtracted at the opponent's turns (sign-flip), so chaos's preference
+    averages out to roughly zero across a search tree. The fix is to attribute
+    the bonus to chaos's own color (``self.playing_as``), which makes it
+    survive sign-flips cleanly. The arena sets ``playing_as`` before each game.
+
+    When ``playing_as`` is unset (e.g. unit tests), we fall back to STM-relative
+    behavior so the diversity test still observes chaos's signature.
+    """
+
     def evaluate(self, board: chess.Board) -> int:
         ph = et.phase(board)
         white_pos = et.material(board, chess.WHITE) + round(PST_MULT * et.pst_score(board, chess.WHITE, ph))
         black_pos = et.material(board, chess.BLACK) + round(PST_MULT * et.pst_score(board, chess.BLACK, ph))
         positional = white_pos - black_pos
 
-        # Chaos bonus: STM prefers complex positions
         complexity = COMPLEXITY_MOBILITY_WEIGHT * (
             et.mobility(board, chess.WHITE) + et.mobility(board, chess.BLACK)
         )
         imbalance = IMBALANCE_WEIGHT * min(et.material_imbalance(board), IMBALANCE_CAP)
         chaos_bonus = round(complexity + imbalance)
 
-        score = positional + chaos_bonus  # chaos_bonus goes to whoever is STM
-        # Flip the positional part for black; the chaos_bonus stays positive for STM
-        if board.turn == chess.BLACK:
-            score = -positional + chaos_bonus
-        return score
+        # Compute white-pov score with chaos_bonus attributed to chaos's own color.
+        if self.playing_as == chess.WHITE:
+            white_pov = positional + chaos_bonus
+        elif self.playing_as == chess.BLACK:
+            white_pov = positional - chaos_bonus
+        else:
+            # No color set — legacy STM-relative behavior (used by tests).
+            white_pov = positional + (chaos_bonus if board.turn == chess.WHITE else -chaos_bonus)
+
+        return white_pov if board.turn == chess.WHITE else -white_pov

@@ -31,6 +31,8 @@ class Player(Protocol):
 
     def play(self, board: chess.Board, max_nodes: int) -> PlayResult: ...
 
+    def set_playing_as(self, color: chess.Color) -> None: ...
+
 
 @dataclass
 class SingleUniversePlayer:
@@ -40,6 +42,9 @@ class SingleUniversePlayer:
     @property
     def name(self) -> str:
         return self.label or f"solo:{self.universe.name}"
+
+    def set_playing_as(self, color: chess.Color) -> None:
+        self.universe.playing_as = color
 
     def play(self, board: chess.Board, max_nodes: int) -> PlayResult:
         result = search(self.universe, board, max_nodes)
@@ -56,6 +61,11 @@ class MultiversePlayer:
     @property
     def name(self) -> str:
         return self.label
+
+    def set_playing_as(self, color: chess.Color) -> None:
+        # Color-aware universes (e.g. chaos) need their own color set; the others ignore it.
+        for u in self.multiverse.universes:
+            u.playing_as = color
 
     def play(self, board: chess.Board, max_nodes: int) -> PlayResult:
         result = self.multiverse.search(board, max_nodes)

@@ -10,9 +10,18 @@ from vi_chess.core.ordering import order_moves as default_order
 
 
 class Universe:
-    """Override `evaluate`. Optionally override `order_moves`."""
+    """Override `evaluate`. Optionally override `order_moves`.
+
+    ``playing_as`` is set by the arena before each game and stays stable for the
+    duration of that game. Most universes ignore it; universes whose stylistic
+    preferences need to survive negamax sign-flips (e.g. chaos's complexity
+    bonus) read it to attribute the preference to their own color instead of
+    side-to-move. ``None`` means "unset" (legacy / tests) — eval should fall
+    back to STM-relative behavior.
+    """
 
     name: str = "unnamed"
+    playing_as: chess.Color | None = None
 
     def evaluate(self, board: chess.Board) -> int:
         """Centipawn score from side-to-move's perspective. Positive = good for STM."""

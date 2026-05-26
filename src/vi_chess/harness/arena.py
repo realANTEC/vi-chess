@@ -99,6 +99,12 @@ def play_game(
     opening_name: str,
     max_nodes: int,
 ) -> GameResult:
+    # Tell each player which color they're playing this game. Most universes
+    # ignore this; color-aware ones (e.g. chaos) use it to attribute stylistic
+    # preferences to their own side instead of side-to-move.
+    white.set_playing_as(chess.WHITE)
+    black.set_playing_as(chess.BLACK)
+
     board = chess.Board(opening_fen)
     moves: list[str] = []
     t_start = time.monotonic()
