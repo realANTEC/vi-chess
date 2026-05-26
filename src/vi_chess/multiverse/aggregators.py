@@ -27,7 +27,7 @@ from vi_chess.core.search import SearchResult
 class ScoreAggregator(Protocol):
     name: str
 
-    def combine(self, scores: list[int]) -> int: ...
+    def combine(self, scores: list[int], board: chess.Board) -> int: ...
 
 
 @runtime_checkable
@@ -43,12 +43,17 @@ def uniform_weights(n: int) -> list[float]:
 
 @dataclass
 class WeightedSum:
-    """Linear combination of universe scores. Used by shared-tree."""
+    """Linear combination of universe scores. Used by shared-tree.
+
+    The ``board`` argument is accepted for protocol uniformity with
+    ``LearnedAggregator`` (which conditions on position features). WeightedSum
+    ignores it.
+    """
 
     weights: list[float]
     name: str = "weighted_sum"
 
-    def combine(self, scores: list[int]) -> int:
+    def combine(self, scores: list[int], board: chess.Board) -> int:
         if len(scores) != len(self.weights):
             raise ValueError(f"expected {len(self.weights)} scores, got {len(scores)}")
         return round(sum(w * s for w, s in zip(self.weights, scores)))

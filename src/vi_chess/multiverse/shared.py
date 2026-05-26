@@ -41,7 +41,7 @@ class SharedTreeMultiverse:
         aggregator = self.aggregator
 
         def evaluate(pos: chess.Board) -> int:
-            return aggregator.combine([u.evaluate(pos) for u in universes])
+            return aggregator.combine([u.evaluate(pos) for u in universes], pos)
 
         return search_with_callables(
             evaluate=evaluate,
