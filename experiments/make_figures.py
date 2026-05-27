@@ -175,11 +175,15 @@ def make_fig2_elo() -> None:
         plt.Rectangle((0, 0), 1, 1, color=PHASE_COLORS[k], ec="black", lw=0.4)
         for k in ("phase2", "phase3_main", "phase3_ablation")
     ]
+    # Legend goes BELOW the plot area in a single horizontal row -- the lower
+    # right corner is occupied by the longest bars, and an in-axes legend would
+    # overlap them. Bottom-anchored legend keeps the data region uncluttered.
     ax.legend(handles,
               ["Phase 2 (naive aggregator)",
                "Phase 3 (learned MLP, main)",
                "Phase 3 (learned MLP, ablation)"],
-              loc="lower right", frameon=False, fontsize=9)
+              loc="upper center", bbox_to_anchor=(0.5, -0.12),
+              ncol=3, frameon=False, fontsize=9)
     fig.savefig(FIG_ELO); plt.close(fig); print(f"wrote {FIG_ELO}")
 
 
