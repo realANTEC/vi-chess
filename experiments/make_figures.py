@@ -83,36 +83,45 @@ def make_fig1_architecture() -> None:
 
     # A: position s -> N universes -> aggregator F -> single score -> alpha-beta tree
     _box(ax_a, 35, 80, 30, 8, "position $s$", fc=POS_FC)
-    universe_positions = []
+    universe_centers_a = []
     for i, label in enumerate(["$V_1$", "$V_2$", "$V_3$", "$\\cdots$", "$V_N$"]):
         x = 4 + i * 19
+        cx = x + 7.5
         _box(ax_a, x, 55, 15, 9, label, fc=UNI_FC, fs=11)
-        universe_positions.append((x + 7.5, 55, x + 7.5, 64))
-        _arrow(ax_a, 50, 80, x + 7.5, 64)
-    _box(ax_a, 25, 30, 50, 9, "Aggregator $F(V_1(s),\\ldots,V_N(s),\\phi(s))$", fc=AGG_FC, fs=10)
-    for x, y, _, _ in universe_positions:
-        _arrow(ax_a, x, y, 50, 39)
-    _box(ax_a, 25, 10, 50, 9, "drives one $\\alpha$-$\\beta$ search tree", fc=OUT_FC, fs=10)
+        universe_centers_a.append(cx)
+        _arrow(ax_a, 50, 80, cx, 64)
+    _box(ax_a, 20, 30, 60, 9, "Aggregator $F(V_1(s),\\ldots,V_N(s),\\phi(s))$",
+         fc=AGG_FC, fs=10)
+    for cx in universe_centers_a:
+        _arrow(ax_a, cx, 55, 50, 39)
+    _box(ax_a, 25, 10, 50, 9, "drives one $\\alpha$-$\\beta$ search tree",
+         fc=OUT_FC, fs=10)
     _arrow(ax_a, 50, 30, 50, 19)
-    ax_a.text(98, 50, "eval\\_cost = $N$\nbudget visits\n$B/N$ leaves",
-              ha="right", va="center", fontsize=9, color="#666", style="italic")
 
     # B: position s -> N parallel (universe + tree) -> N results -> move aggregator -> final move
-    _box(ax_b, 35, 80, 30, 8, "position $s$", fc=POS_FC)
-    for i, label in enumerate(["$(V_1,T_1)$", "$(V_2,T_2)$", "$(V_3,T_3)$", "$\\cdots$", "$(V_N,T_N)$"]):
+    _box(ax_b, 35, 85, 30, 8, "position $s$", fc=POS_FC)
+    result_anchors = []  # (x, y_bottom) of each (move_i, score_i) label
+    for i, label in enumerate(["$(V_1,T_1)$", "$(V_2,T_2)$", "$(V_3,T_3)$",
+                                "$\\cdots$", "$(V_N,T_N)$"]):
         x = 4 + i * 19
-        _box(ax_b, x, 48, 15, 16, label + "\n\n$B/N$ nodes", fc=UNI_FC, fs=9)
-        _arrow(ax_b, 50, 80, x + 7.5, 64)
-        _arrow(ax_b, x + 7.5, 48, x + 7.5, 41)
-        ax_b.text(x + 7.5, 36, "(move$_i$, score$_i$)", ha="center", va="center", fontsize=8, style="italic")
-    _box(ax_b, 25, 22, 50, 9, "Move-Aggregator (e.g. plurality vote)", fc=AGG_FC, fs=10)
-    for i in range(5):
-        x = 4 + i * 19 + 7.5
-        _arrow(ax_b, x, 32, 50, 31)
+        cx = x + 7.5
+        # Universe+tree box
+        _box(ax_b, x, 55, 15, 16, label + "\n\n$B/N$ nodes", fc=UNI_FC, fs=9)
+        # Position -> box
+        _arrow(ax_b, 50, 85, cx, 71)
+        # Box -> result label (short vertical)
+        _arrow(ax_b, cx, 55, cx, 49)
+        ax_b.text(cx, 45, "(move$_i$, score$_i$)",
+                  ha="center", va="center", fontsize=8, style="italic")
+        result_anchors.append((cx, 41))
+    # Move-Aggregator (with a clear gap above it for the converging arrows)
+    _box(ax_b, 25, 22, 50, 9, "Move-Aggregator (e.g. plurality vote)",
+         fc=AGG_FC, fs=10)
+    for cx, by in result_anchors:
+        _arrow(ax_b, cx, by, 50, 31)
+    # Aggregator -> final move
     _box(ax_b, 35, 6, 30, 9, "final move", fc=OUT_FC, fs=10)
     _arrow(ax_b, 50, 22, 50, 15)
-    ax_b.text(98, 50, "each tree gets\n$B/N$ nodes\n$\\Rightarrow$ shallow per universe",
-              ha="right", va="center", fontsize=9, color="#666", style="italic")
 
     plt.tight_layout()
     fig.savefig(FIG_ARCH)
