@@ -159,9 +159,12 @@ def make_fig2_elo() -> None:
     fig, ax = plt.subplots(figsize=(7.4, 5.4))
     bars = ax.barh(labels, elos, color=colors, edgecolor="black", linewidth=0.4)
     ax.axvline(0, color="black", linewidth=0.8)
+    # Place each label OUTSIDE the bar (to the left of its tip) so the bar
+    # interiors stay visually clean. Right-aligned so the text grows leftward
+    # away from the bar end.
     for bar, e in zip(bars, elos):
-        ax.text(e + 8, bar.get_y() + bar.get_height() / 2, f"{e:+}",
-                va="center", ha="left", fontsize=9)
+        ax.text(e - 8, bar.get_y() + bar.get_height() / 2, f"{e:+}",
+                va="center", ha="right", fontsize=9)
     ax.set_xlabel("Elo difference vs. `mobility` solo  (negative = multiverse lost)")
     ax.set_title("Multiverse variants vs. best-solo (`mobility`)\n"
                  "40 games per matchup, 10 000 nodes/move",
